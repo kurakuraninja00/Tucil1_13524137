@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Queens Solver</title>
+    <style>
+        body { font-family: sans-serif; background: #985555; color: #eee; display: flex; flex-direction: column; align-items: center; padding: 30px; }
+        h2 { margin-bottom: 16px; }
+        input[type="file"] { display: none; }
+        button { background: #3f292d; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; margin: 6px; font-size: 20px; }
+        button:disabled { opacity: .4; cursor: default; }
+        #board { display: grid; gap: 2px; margin: 16px 0; }
+        .cell { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 24px; }
+        .info { font-size: 13px; color: #aaa; margin: 4px 0; }
+        canvas { display: none; }
+    </style>
+</head>
+<body>
+    <h2>Queens Solver</h2>
+    <div>
+        <button onclick="document.getElementById('f').click()">Input .txt</button>
+        <button id="solveBtn" onclick="solve()" disabled>Solve</button>
+        <button id="saveBtn" onclick="saveImage()" disabled>Save as Image</button>
+        <input type="file" id="f" accept=".txt" onchange="load(event)">
+    </div>
+    <div class="info" id="status"></div>
+    <div id="board"></div>
+    <div class="info" id="stats"></div>
+    <canvas id="canvas"></canvas>
+
+<script>
+const COLORS = ['#FF0000','#00CC00','#0066FF','#FFD700','#FF00FF','#FF8800','#00CCCC','#8800CC','#CCCC00','#CC0066','#0000CC','#00FF88','#CC4400','#8888FF','#006644','#FF6699','#444444','#88DDFF','#AA5500','#00AA00','#DD0088','#5555FF','#BBBB00','#FF4444','#009999','#CC88FF'];
+let bd=[],sz=0,cm={},cc={};
+
+function load(e){
+    const r=new FileReader();
+    r.onload=function(ev){
+        const lines=ev.target.result.split('\n').map(l=>l.replace(/\r/,'').trimEnd()).filter(l=>l);
+        bd=[];cc={};cm={};let ci=0;
+        for(let y=0;y<lines.length;y++){
+            const row=[];let col=0;
+            for(let x=0;x<lines[y].length;x++){
+                const c=lines[y][x];
+                if(c!==' '&&c!=='\t'){
+                    row.push(c);
+                    if(!cc[c]){cc[c]=[];cm[c]=COLORS[ci++%COLORS.length];}
+                    cc[c].push({x:col,y});col++;
+                }
+            }
+            bd.push(row);
+        }
+        sz=bd.length;
+        if(Object.keys(cc).length!==sz){status('Error: warna ≠ ukuran papan',1);return;}
+        render({});status('File loaded. '+sz+'x'+sz+', '+Object.keys(cc).length+' warna');
+        document.getElementById('solveBtn').disabled=false;
+    };
+    r.readAsText(e.target.files[0]);
+}
+
+function render(qp){
+    const b=document.getElementById('board');
+    b.style.gridTemplateColumns=`repeat(${sz},44px)`;b.innerHTML='';
+    for(let y=0;y<sz;y++)for(let x=0;x<sz;x++){
+        const d=document.createElement('div');d.className='cell';
+        d.style.background=cm[bd[y][x]]||'#333';
+        for(const p of Object.values(qp))if(p.x===x&&p.y===y)d.textContent='♛';
+        b.appendChild(d);
+    }
+}
+
+function status(m,err){document.getElementById('status').style.color=err?'#e94560':'#aaa';document.getElementById('status').textContent=m;}
+
+async function solve(){
+    const colors=Object.keys(cc),n=colors.length,idx=new Array(n).fill(0),mx=colors.map(c=>cc[c].length);
+    let it=0;const t0=performance.now();
+    document.getElementById('solveBtn').disabled=true;
+    while(true){
+        it++;
+        const tp={};for(let i=0;i<n;i++)tp[colors[i]]=cc[colors[i]][idx[i]];
+        if(it%500===0){render(tp);status('Iterasi: '+it);await new Promise(r=>setTimeout(r,0));}
+        let ok=true;
+        for(let i=0;i<n&&ok;i++)for(let j=i+1;j<n&&ok;j++){
+            const a=tp[colors[i]],b=tp[colors[j]];
+            if(a.x===b.x||a.y===b.y||(Math.abs(a.x-b.x)===1&&Math.abs(a.y-b.y)===1))ok=false;
+        }
+        if(ok){
+            render(tp);
+            const ms=(performance.now()-t0).toFixed(1);
+            status('Solusi ditemukan!');
+            document.getElementById('stats').textContent=it+' iterasi, '+ms+' ms';
+            document.getElementById('saveBtn').disabled=false;
+            document.getElementById('solveBtn').disabled=false;
+            return;
+        }
+        let c=n-1;
+        while(c>=0){idx[c]++;if(idx[c]<mx[c])break;idx[c]=0;c--;}
+        if(c<0){status('Tidak ada solusi',1);document.getElementById('solveBtn').disabled=false;return;}
+    }
+}
+
+function saveImage(){
+    const s=50,gap=2,total=sz*s+(sz-1)*gap;
+    const cv=document.getElementById('canvas');cv.width=total;cv.height=total;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle='#111';ctx.fillRect(0,0,total,total);
+    const cells=document.getElementById('board').children;
+    for(let y=0;y<sz;y++)for(let x=0;x<sz;x++){
+        const cell=cells[y*sz+x];
+        const px=x*(s+gap),py=y*(s+gap);
+        ctx.fillStyle=cm[bd[y][x]]||'#333';
+        ctx.beginPath();ctx.roundRect(px,py,s,s,4);ctx.fill();
+        if(cell.textContent==='♛'){
+            ctx.fillStyle='#fff';ctx.font='28px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+            ctx.fillText('♛',px+s/2,py+s/2);
+        }
+    }
+    const a=document.createElement('a');
+    a.download='queens_solution.png';a.href=cv.toDataURL('image/png');a.click();
+}
+</script>
+</body>
+</html>

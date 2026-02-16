@@ -1,0 +1,225 @@
+KAMUS GLOBAL
+    coordinates: <x : integer, y : integer>
+    colors_coordinate : map<char, array of coordinates>
+    queens_position: map<char, coordinates>
+    board: array of string
+
+procedure ShiftQueens (input/output queens_position: map<char, coordinates>)
+    {I.S setiap queen di queens_position terletak di petak awal masing2 warna
+    F.S jika ada petak yang conflict, maka terjadi penyesuaian petak setiap queen pada queens_position}
+KAMUS
+    colors : array of char
+    n : integer
+    indices: array of integer
+    maxIndices: array of integer
+    posA, posB : coordinates
+    tempPos : map<char, coordinates>
+    found, allValid : boolean
+    carry: integer
+    iterationCount : integer
+    startTime, endTime : time
+    waktuMs : real
+
+ALGORITMA
+    iterationCount <- 0
+    startTime <- currentTime()
+
+    {#1==============================}
+    {1. buat daftar warna dari colors_coordinate: }
+    for each pair in queens_position do
+        colors.add(color)
+    n <- colors.length
+    
+    {#2==============================}
+    {2. inisialisasi index setiap warna: }
+    indices <- array of n elements, all 0
+
+    {#3==============================}
+    {3. hitung jumlah koordinat maks setiap warna: }
+    for i <- 0 to n-1 do
+        maxIndices[i] <- colors_coordinate[colors[i]].length
+    found <- false
+
+    {#4==============================}
+    {4. algoritma brute force }
+    while(!found) do
+        iterationCount <- iterationCount + 1
+
+        {#4a==============================}
+        {4a. buat posisi queen sementara dari indices skrg}
+        for i <- 0 to n-1 do
+            tempPos[colors[i]] <- colors_coordinate[colors[i]][indices[i]]
+        
+        {#4b==============================}
+        {4b. live update: tampilkan proses brute force setiap 1 detik}
+        clearScreen()
+        output("Iterasi ke-", iterationCount)
+        printBoard(tempPos)
+        sleep(1000)  {tunggu 1 detik (1000 ms)}
+
+        {4c. cek apakah terjadi konflik antar queen}
+        allValid <- true
+        for i <- 0 to n-1 do
+            for j <- i+1 to n-1 do
+                posA <- tempPos[colors[i]]
+                posB <- tempPos[colors[j]]
+
+                {cek baris, kolom, dan diagonal yg bersentuhan}
+                if  (posA.x = posB.x) or
+                    (posA.y = posB.y) or
+                    (abs(posA.x - posB.x) = 1 AND abs(posA.y - posB.y) = 1) then
+                    allValid <- false
+
+        {#4c==============================}
+        {4c. if valid, simpan solusi}
+        if allValid then
+            queens_position <- tempPos
+            found <- true
+        else
+            {4d. increment indices}
+            carry <- n-1
+            while carry >= 0 do
+                indices[carry] <- indices[carry] +1
+                if(indices[carry] < maxIndices[carry]) then
+                    break
+                indices[carry] <- 0
+                carry <- carry -1
+
+            {4e. if semua kombinasi sdh dicoba tp ga ktemu}
+            if (carry < 0) then
+                output("Tidak ada solusi!")
+                break
+
+    endTime <- currentTime()
+    waktuMs <- (endTime - startTime) dalam milidetik
+
+    output("hasil akhir:")
+    printBoard(queens_position)
+
+    output("Jumlah konfigurasi yang ditinjau: ", iterationCount)
+
+    output("Waktu eksekusi: ", waktuMs, " ms")
+
+
+procedure printBoard(input queens_position : map<char, coordinates>)
+    {I.S: queens_posistion berisi posisi queen, board berisi papan asli
+     F.S: papan ditampilkan dengan posisi queen ditandai '#'}
+KAMUS
+    output : array of string
+    pos : coordinates
+    line : string
+    colIdx : integer
+ALGORITMA
+    output <- board
+
+    for each <color, pos> in queens_pos do
+        if(pos.y >= 0 and pos.y < output.length) then
+            colIdx <- 0
+            for i = 0 to output[pos.y].length - 1 do
+                if(output[pos.y][i] != ' ' and output[pos.y][i] != '\t') then
+                    if(colIdx = pos.x)then
+                        output[pos.y][i] = '#'
+                        break
+                    colIdx <- colIdx + 1
+
+
+    for each line in outputBoard do
+        output(line)
+
+
+{ALGORITMA UTAMA=================================================}
+function main() -> integer 
+KAMUS
+    filename : string
+    file : ifstream
+    line : string
+    x, y : integer
+    c : char
+    boardWidth : integer
+    charCount : integer
+    colIdx : integer
+    isValid : boolean
+    color : char
+    coords: array of coordinates
+
+ALGORITMA
+    {#1 minta input=============================}
+    output("masukkan nama file test case (.txt): ")
+    input(filename)
+
+    if filename tidak berakhiran ".txt" then
+        output("Error: file harus berekstensi .txt!")
+        return
+    
+    file <- open(filename)
+    if NOT file is open then
+        output("error: tidak dapat buka file ", filename)
+        return
+    
+    {#2 baca file dan validasi=================}
+    y <- 0
+    boardWidth <- -1
+    isValid <- true
+
+    while getline(file, line)do
+        {trim spasi di akhir baris}
+        while line tidak kosong AND (karakter terakhir line = ' ' OR karakter terakhir line = '\t') do
+            hapus karakter terakhir dari line
+        
+        board.add(line)
+
+        if(board.length = 0) then
+            continue
+
+        {#3 hitung lebar papan (hanya karakter non-spasi)============}
+        charCount <- 0
+        for i <- 0 to line.length - 1 do
+            if line[i] != ' ' AND line[i] != '\t' then
+                charCount <- charCount + 1
+        
+        if boardWidth = -1 then
+            boardWidth <- charCount
+        else
+            if charCount != boardWidth then
+                output("Error: ukuran papan tidak konsisten")
+                isValid <- false
+                return
+        
+        {simpan koordinat setiap warna (x = index non-spasi)}
+        colIdx <- 0
+        for x <- 0 to line.length - 1 do
+            c <- line[x]
+            if c != ' ' and c != '\t' then
+                colors_coordinate[c].add({colIdx, y})
+                colIdx <- colIdx + 1
+        y <- y + 1
+    close(filename)
+
+    {#4 cek apakah papan kosong=================}
+    if board.length = 0 then
+        output("Error: file kosong")
+        return
+    
+    {#5 cek apakah papan persegi================}
+    if board.length != boardWidth then
+        output("Error: papan tidak NxN")
+        return
+    
+    {#6 cek apakah jumlah warna = jumlah kolom/baris}
+    if colors_coordinate.lentgh != board.length then
+        output("error: jumlh warna hrs sesuai dgn ukuran papan")
+        return
+    
+    output("input valid")
+    output("jumlah warna: ", colors_coordinate.length)
+
+    {======================ALGORITMA INTI=================}
+    {#1 tempatin queen di petak awal setiap region warna}
+    for each <color, coords> in colors_coordinate do
+        if NOT coords.empty then
+            queens_posistion[color] <- coords[0]
+    
+    {#2 brute force}
+    ShiftQueens(queens_posistion)
+
+       
