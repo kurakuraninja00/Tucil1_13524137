@@ -112,7 +112,7 @@ KAMUS
 ALGORITMA
     output <- board
 
-    for each <color, pos> in queens_pos do
+    for each <color, pos> in queens_position do
         if(pos.y >= 0 and pos.y < output.length) then
             colIdx <- 0
             for i = 0 to output[pos.y].length - 1 do
