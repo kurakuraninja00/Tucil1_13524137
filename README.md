@@ -13,7 +13,7 @@ program dibuat dengan menggunakan bruteforce. dengan meminta masukan dari file t
 ```start index.html```
 
 ## author
-Nama: Reysha Syafitri MR
-NIM : 13524137
+Nama: Reysha Syafitri MR\
+NIM : 13524137\
 Kelas : K03
 
