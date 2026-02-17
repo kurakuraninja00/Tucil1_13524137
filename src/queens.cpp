@@ -5,7 +5,11 @@ std::map<char, coordinates> queens_position;
 std::vector<std::string> board;
 
 void clearScreen(){
-    system("cls");
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
 }
 
 void ShiftQueens(std::map<char,coordinates>& queens_position){
