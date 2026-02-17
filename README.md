@@ -7,9 +7,11 @@ adalah menempatkan queen pada sebuah papan persegi berwarna sehingga terdapat ha
 tiap baris, kolom, dan daerah warna. Selain itu, satu queen tidak dapat ditempatkan bersebelahan dengan 
 queen lainnya, termasuk secara diagonal. 
 
-program dibuat dengan menggunakan bruteforce. dengan meminta masukan dari file txt, lalu masukkan koordinat tiap warna ke dalam map dengan key char dan value coordinat (x,y) lalu tiap tiap queen dalam queen_position diinisialisasi, tiap warna punya 1 queen, dan queen ditempatkan di petak awal dari koordinat masing2 warna. kemudian queen melalui proses brute force, dicoba kombinasi, jika dilihat posisi secara baris, kolom atau secara diagonal bersentuhan ada sepasang queen, maka akan dicoba semua kemungkinan petak koordinat dari region warna terakhir, jika masih belum ditemukannnya solusi yang valid, maka semua kemungkinan petak koordinat dari region warna lainnya yang akan dicoba, kombinasi dilakukan secara menyilang (uji koordinat antar warna diuji secara bersamaan). pengujian tiap-tiap kombinasi silang dilakukan hingga ditemukan solusi yang valid atau seluruh kombinasi habis (tidak ditemukan solusi).
+program dibuat dengan menggunakan algoritma brute force. dengan meminta masukan dari file txt, lalu masukkan koordinat tiap warna ke dalam map dengan key char dan value coordinat (x,y) lalu tiap tiap queen dalam queen_position diinisialisasi, tiap warna punya 1 queen, dan queen ditempatkan di petak awal dari koordinat masing2 warna. kemudian queen melalui proses brute force, dicoba kombinasi, jika dilihat posisi secara baris, kolom atau secara diagonal bersentuhan ada sepasang queen, maka akan dicoba semua kemungkinan petak koordinat dari region warna terakhir, jika masih belum ditemukannnya solusi yang valid, maka semua kemungkinan petak koordinat dari region warna lainnya yang akan dicoba, kombinasi dilakukan secara menyilang (uji koordinat antar warna diuji secara bersamaan). pengujian tiap-tiap kombinasi silang dilakukan hingga ditemukan solusi yang valid atau seluruh kombinasi habis (tidak ditemukan solusi).
 
 ## cara menjalankan program
+terminal\
+```cd Tucil1_13524137/src```
 ```start index.html```
 
 ## author
